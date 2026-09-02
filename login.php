@@ -94,7 +94,7 @@ require_once("include/initialize.php");
   body.login-page::before {
     content: "";
     position: fixed;
-    top: 50%; left: 50%;
+    top: 49%; left: 50%;
     width: 900px; height: 900px;
     background-image: url('ust-scc.png');
     background-repeat: no-repeat;
