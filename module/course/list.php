@@ -36,9 +36,6 @@ $courseSuggestions = $mydb->loadResultList();
                 </table>
                 <div class="btn-group">
                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#AddNewEntry">Add New</button>
-                  <button type="button" class="btn btn-secondary" id="btnPrintCourses">
-                    <span class="fa fa-print"></span> Print
-                  </button>
                 </div>
               </div>
               <!-- /.card-body -->
