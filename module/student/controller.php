@@ -34,7 +34,7 @@ switch ($action) {
 		$MNAME 		= $_POST['MNAME'];
 		$SEX 		= $_POST['SEX'];
 		$BDAY  = $_POST['BDAY'];
-		
+		$BPLACE = $_POST['BPLACE'];
 
 		$res = $student->find_all_student($IDNO);
 		
@@ -50,7 +50,8 @@ switch ($action) {
 				$student->MNAME 	= $MNAME;
 				$student->SEX 	= $SEX;
 				$student->BDAY 	= $BDAY;
-				
+				$student->BPLACE = $BPLACE;
+
 				 
 				 $istrue = $student->create(); 
 				 
@@ -78,6 +79,7 @@ switch ($action) {
 			$LNAME	= $_POST['LNAME1'];
 			$SEX	= $_POST['SEX1'];
 			$BDAY	= $_POST['BDAY1'];
+			$BPLACE = $_POST['BPLACE1'];
 					
 					
 				$student->IDNO = $IDNO;
@@ -86,7 +88,7 @@ switch ($action) {
 				$student->LNAME = $LNAME;
 				$student->SEX 	= $SEX;
 				$student->BDAY 	= $BDAY;
-				
+				$student->BPLACE = $BPLACE;
 				 
 				 $istrue = $student->update($UID); 
 				 if ($istrue == true){

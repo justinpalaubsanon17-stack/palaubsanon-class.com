@@ -123,6 +123,7 @@ require_once ("../../theme/template.php");
        $('#LNAME1').val(data.LNAME);
        $('#SEX1').val(data.SEX);
        $('#BDAY1').val(data.BDAY);
+       $('#BPLACE1').val(data.BPLACE);
       
       }
     })

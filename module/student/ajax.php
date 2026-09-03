@@ -19,6 +19,7 @@ if (isset($_POST['UID'])) {
 		$output["LNAME"] = $row->LNAME;
 		$output["SEX"] = $row->SEX;
 		$output["BDAY"] = $row->BDAY;
+		$output["BPLACE"] = $row->BPLACE;
 		// $output["TYPE"] = $row->TYPE;
 		// $output["STATUSACTIVE"] = $row->STATUSACTIVE;
 				
@@ -26,7 +27,7 @@ if (isset($_POST['UID'])) {
 	echo json_encode($output);
 }else{
 	$output = array();
-	$query = "SELECT `S_ID`, `LNAME`, `FNAME`, `MNAME`, `SEX`, `BDAY` FROM `tblstudent`";
+	$query = "SELECT `S_ID`, `LNAME`, `FNAME`, `MNAME`, `SEX`, `BDAY`, `BPLACE` FROM `tblstudent`";
 
 	if(isset($_POST["search"]["value"]))
 	{
@@ -60,6 +61,7 @@ if (isset($_POST['UID'])) {
 		$sub_array[] = $result->MNAME;
 		$sub_array[] = $result->SEX;
 		$sub_array[] = $result->BDAY;
+		$sub_array[] = $result->BPLACE;
 		
 		$sub_array[] = '
 
@@ -77,7 +79,7 @@ if (isset($_POST['UID'])) {
 	function get_total_all_records()
 	{
 		global $mydb;
-		$statement = "SELECT `S_ID`, `LNAME`, `FNAME`, `MNAME`, `SEX`, `BDAY` FROM `tblstudent`";
+		$statement = "SELECT `S_ID`, `LNAME`, `FNAME`, `MNAME`, `SEX`, `BDAY`,  FROM `tblstudent`";
 		$mydb->setQuery($statement);
 		return $mydb->num_rows();
 	}

@@ -22,6 +22,7 @@
                     <th>MNAME</th>
                     <th>SEX</th>
                       <th>BDAY</th>
+                      <th>BPLACE</th>
 
                    
                     <th>Action</th>
