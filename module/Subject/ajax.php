@@ -67,6 +67,8 @@ if (isset($_POST['UID'])) {
 		
 		<a href="index.php?view=view&id='.$result->SUBJECT_ID.'"><button type="button" class="btn btn-info btn-xs" title="View"><span class="fa fa-eye"></span></button></a>
 
+		<a href="print.php?id='.$result->SUBJECT_ID.'" target="_blank"><button type="button" class="btn btn-secondary btn-xs" title="Print"><span class="fa fa-print"></span></button></a>
+
 		<a href="controller.php?action=delete&id='.$result->SUBJECT_ID .'"><button type="button" class="btn btn-danger btn-xs SaveReg" ><span class="fa fa-trash fw-fa"></span> Del</button></a>
 
 		';
