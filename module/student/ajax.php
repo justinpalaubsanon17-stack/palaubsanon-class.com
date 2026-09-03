@@ -79,7 +79,7 @@ if (isset($_POST['UID'])) {
 	function get_total_all_records()
 	{
 		global $mydb;
-		$statement = "SELECT `S_ID`, `LNAME`, `FNAME`, `MNAME`, `SEX`, `BDAY`,  FROM `tblstudent`";
+		$statement = "SELECT `S_ID`, `LNAME`, `FNAME`, `MNAME`, `SEX`, `BDAY`, `BPLACE`  FROM `tblstudent`";
 		$mydb->setQuery($statement);
 		return $mydb->num_rows();
 	}

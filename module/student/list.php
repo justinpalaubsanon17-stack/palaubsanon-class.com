@@ -127,6 +127,14 @@
                       </div>
                     </div>
                    
+<div class="form-group">
+                       <label for="BPLACE"  class="col-form-label col-form-label-sm">Birth Place</label>
+                       
+                        <input type="text" class="form-control form-control-sm" name="BPLACE"
+                        id="BPLACE" placeholder="Enter Birth Place" required>
+                      </div>
+                    </div>
+
                   </div>
                                 
                 <!-- /.card-body -->
@@ -165,7 +173,7 @@
                     
  <!-- /.container-fluid //`IDNO`, `FNAME`, `LNAME`, `MNAME`, `SEX`, `BDAY` -->
 
-<input type="text" name="UID" id="UID">
+<input type="hidden" name="UID" id="UID">
 
 
 
@@ -225,8 +233,17 @@
                         <input type="date" class="form-control form-control-sm" name="BDAY1"
                         id="BDAY1" placeholder="Enter Birth of Date" required>
                       </div>
+
+                      
                     </div>
-                   
+                       <div class="form-group">
+                       <label for="TYPE"  class="col-form-label col-form-label-sm">Birth Place</label>
+                       
+                        <input type="text" class="form-control form-control-sm" name="BPLACE1"
+                        id="BPLACE1" placeholder="Enter Birth Place" required>
+                      </div>
+                    </div>
+
                   </div>
                                 
                 <!-- /.card-body -->
