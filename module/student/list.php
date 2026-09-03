@@ -127,6 +127,7 @@
                       </div>
                     </div>
                    
+<div class="col-sm-12">
 <div class="form-group">
                        <label for="BPLACE"  class="col-form-label col-form-label-sm">Birth Place</label>
                        
@@ -236,6 +237,7 @@
 
                       
                     </div>
+                       <div class="col-sm-12">
                        <div class="form-group">
                        <label for="TYPE"  class="col-form-label col-form-label-sm">Birth Place</label>
                        
