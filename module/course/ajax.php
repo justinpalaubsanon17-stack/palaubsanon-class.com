@@ -51,6 +51,7 @@ if (isset($_POST['UID'])) {
 		$sub_array[] = '
 			<button type="button" name="update" UID="'.$result->course_id.'" class="btn btn-warning btn-xs editEntry"><span class="fa fa-edit fw-fa"></span></button>
 			<button type="button" name="view" UID="'.$result->course_id.'" class="btn btn-info btn-xs viewcourse"><span class="fa fa-eye"></span></button>
+			<button type="button" name="print" UID="'.$result->course_id.'" class="btn btn-secondary btn-xs printcourse"><span class="fa fa-print"></span></button>
 			<a href="controller.php?action=delete&id='.$result->course_id .'"><button type="button" class="btn btn-danger btn-xs SaveReg"><span class="fa fa-trash fw-fa"></span> Del</button></a>
 		';
 

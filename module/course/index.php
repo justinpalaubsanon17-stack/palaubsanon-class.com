@@ -81,3 +81,10 @@ require_once ("../../theme/template.php");
     window.location.href = "index.php?view=view&id=" + uid;
   });
 </script>
+
+<script type="text/javascript">
+  $(document).on('click', '.printcourse', function(){
+    var uid = $(this).attr("UID");
+    window.open("<?php echo WEB_ROOT; ?>module/course/print.php?id=" + uid, "_blank");
+  });
+</script>
