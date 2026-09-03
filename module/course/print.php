@@ -19,127 +19,112 @@ if ($id > 0) {
   <title><?php echo $single ? 'Course - ' . htmlspecialchars($single->course_code) : 'List of Courses'; ?> - Print</title>
   <style>
     :root {
-      --ink: #1A1A1A;
-      --gold: #F5B915;
-      --gold-bg: #fdf3d6;
-      --orange: #E8641A;
-      --red: #B3261E;
-      --muted: #8a8a8a;
-      --panel: #f7f7f6;
-      --border: #e6e6e2;
-      --border-strong: #cfcfc8;
+      --ink: #172536;
+      --navy: #173b5f;
+      --gold: #c89b3c;
+      --muted: #667384;
+      --panel: #f4f6f8;
+      --border: #d8dee5;
     }
     * { box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       color: var(--ink);
       margin: 0;
-      padding: 0;
-      background: #f2f2f2;
+      padding: 32px 20px;
+      background: #eef1f4;
     }
     .page {
       max-width: 880px;
-      margin: 30px auto;
+      margin: 0 auto;
       background: #fff;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      border-top: 6px solid var(--navy);
+      box-shadow: 0 8px 28px rgba(23,37,54,0.09);
     }
 
     .top-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 40px;
-      background: var(--ink);
-      border-bottom: 3px solid var(--gold);
+      padding: 24px 44px 20px;
+      border-bottom: 1px solid var(--border);
     }
-    .brand-mini { display: flex; align-items: center; gap: 10px; }
+    .brand-mini { display: flex; align-items: center; gap: 13px; }
     .brand-mini img {
-      width: 34px; height: 34px; object-fit: contain;
+      width: 42px; height: 42px; object-fit: contain;
     }
-    .brand-mini .name { font-weight: 700; font-size: 14px; color: var(--gold); letter-spacing: 0.3px; }
-    .brand-mini .sub { font-size: 9px; color: #cfcfcf; text-transform: uppercase; letter-spacing: 1px; }
+    .brand-mini .name { font-weight: 700; font-size: 15px; color: var(--navy); letter-spacing: 0.4px; }
+    .brand-mini .sub { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.4px; margin-top: 3px; }
 
     .pill {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      color: var(--ink);
-      background: var(--gold);
-      padding: 5px 12px;
-      border-radius: 6px;
+      color: var(--navy);
+      border: 1px solid var(--gold);
+      padding: 7px 11px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
 
-    .main { padding: 26px 40px 30px; }
+    .main { padding: 34px 44px 30px; }
 
-    .title-block { margin: 0 0 6px; }
+    .title-block { margin: 0 0 26px; }
     .title-block h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: 25px;
       font-weight: 700;
+      color: var(--navy);
     }
     .title-block .meta {
       font-size: 12px;
       color: var(--muted);
-      margin-top: 4px;
+      margin-top: 8px;
     }
 
     .stat-row {
       display: flex;
-      gap: 12px;
-      margin: 22px 0 8px;
+      gap: 18px;
+      margin: 0 0 18px;
     }
     .stat-box {
       flex: 1;
-      background: #fff;
       border: 1px solid var(--border);
-      border-left: 3px solid var(--orange);
-      border-radius: 8px;
-      padding: 14px 16px;
+      padding: 16px 18px;
     }
-    .stat-box .k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-    .stat-box .v { font-size: 16px; font-weight: 700; margin-top: 4px; color: var(--ink); }
+    .stat-box .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .stat-box .v { font-size: 16px; font-weight: 700; margin-top: 8px; color: var(--ink); }
     .stat-box.wide { flex: 2; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 22px; }
-    th, td { padding: 10px 8px; text-align: left; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { padding: 13px 12px; text-align: left; font-size: 13px; }
     thead th {
-      border-bottom: 2px solid var(--ink);
+      background: var(--navy);
+      border-bottom: 2px solid var(--gold);
       font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--muted);
+      letter-spacing: 0.8px;
+      color: #fff;
       font-weight: 700;
     }
     tbody tr { border-bottom: 1px solid var(--border); }
-    tbody tr:hover { background: var(--panel); }
+    tbody tr:nth-child(even) { background: var(--panel); }
 
     .row-num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      background: var(--ink);
-      color: var(--gold);
-      font-size: 11px;
+      color: var(--muted);
+      font-size: 12px;
       font-weight: 700;
     }
     .code-chip {
       display: inline-block;
-      padding: 3px 9px;
-      border-radius: 6px;
-      background: var(--gold-bg);
-      color: #8a640b;
+      color: var(--navy);
       font-size: 12px;
       font-weight: 700;
     }
 
     .bottom-bar {
-      margin-top: 30px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
+      margin-top: 36px;
+      padding-top: 12px;
+      border-top: 2px solid var(--gold);
       display: flex;
       justify-content: space-between;
       font-size: 10px;
@@ -148,8 +133,18 @@ if ($id > 0) {
 
     @media print {
       body { background: #fff; }
-      .page { box-shadow: none; margin: 0; max-width: 100%; }
+      .page { box-shadow: none; margin: 0; max-width: 100%; border-top-width: 4px; }
+      .main { padding-bottom: 0; }
       button { display: none; }
+    }
+    @media (max-width: 620px) {
+      body { padding: 0; }
+      .top-row, .main { padding-left: 22px; padding-right: 22px; }
+      .top-row { align-items: flex-start; gap: 16px; }
+      .stat-row { display: block; margin-bottom: 0; }
+      .stat-box { margin-bottom: 14px; }
+      table { min-width: 620px; }
+      .main { overflow-x: auto; }
     }
   </style>
 </head>
