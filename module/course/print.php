@@ -19,11 +19,15 @@ if ($id > 0) {
   <title><?php echo $single ? 'Course - ' . htmlspecialchars($single->course_code) : 'List of Courses'; ?> - Print</title>
   <style>
     :root {
-      --gold: #e8a324;
-      --gold-deep: #b8790f;
-      --ink: #1a1a1a;
+      --ink: #1A1A1A;
+      --gold: #F5B915;
+      --gold-bg: #fdf3d6;
+      --orange: #E8641A;
+      --red: #B3261E;
       --muted: #8a8a8a;
-      --panel: #fafafa;
+      --panel: #f7f7f6;
+      --border: #e6e6e2;
+      --border-strong: #cfcfc8;
     }
     * { box-sizing: border-box; }
     body {
@@ -37,68 +41,42 @@ if ($id > 0) {
       max-width: 880px;
       margin: 30px auto;
       background: #fff;
-      display: flex;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      position: relative;
-      overflow: hidden;
     }
-
-    .side-strip {
-      width: 14px;
-      background: linear-gradient(180deg, var(--ink) 0%, var(--gold) 100%);
-      flex-shrink: 0;
-    }
-
-    .watermark {
-      position: absolute;
-      top: 45%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-28deg);
-      font-size: 68px;
-      font-weight: 900;
-      color: rgba(0,0,0,0.035);
-      white-space: nowrap;
-      pointer-events: none;
-      z-index: 0;
-      letter-spacing: 4px;
-    }
-
-    .main { flex: 1; padding: 34px 40px 30px; position: relative; z-index: 1; }
 
     .top-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 18px;
-      border-bottom: 2px solid #eee;
+      padding: 20px 40px;
+      background: var(--ink);
+      border-bottom: 3px solid var(--gold);
     }
     .brand-mini { display: flex; align-items: center; gap: 10px; }
-    .brand-mini .crest {
-      width: 34px; height: 34px; border-radius: 8px;
-      background: var(--ink); color: var(--gold);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 13px;
+    .brand-mini img {
+      width: 34px; height: 34px; object-fit: contain;
     }
-    .brand-mini .name { font-weight: 800; font-size: 14px; }
-    .brand-mini .sub { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .brand-mini .name { font-weight: 700; font-size: 14px; color: var(--gold); letter-spacing: 0.3px; }
+    .brand-mini .sub { font-size: 9px; color: #cfcfcf; text-transform: uppercase; letter-spacing: 1px; }
 
     .pill {
       font-size: 10px;
       font-weight: 700;
-      color: var(--gold-deep);
-      background: #fdf1dc;
-      border: 1px solid var(--gold);
+      color: var(--ink);
+      background: var(--gold);
       padding: 5px 12px;
-      border-radius: 20px;
+      border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .title-block { margin: 24px 0 6px; }
+    .main { padding: 26px 40px 30px; }
+
+    .title-block { margin: 0 0 6px; }
     .title-block h1 {
       margin: 0;
-      font-size: 25px;
-      font-weight: 800;
+      font-size: 22px;
+      font-weight: 700;
     }
     .title-block .meta {
       font-size: 12px;
@@ -109,21 +87,22 @@ if ($id > 0) {
     .stat-row {
       display: flex;
       gap: 12px;
-      margin: 24px 0 8px;
+      margin: 22px 0 8px;
     }
     .stat-box {
       flex: 1;
-      background: var(--panel);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
       border-radius: 8px;
       padding: 14px 16px;
-      border-top: 3px solid var(--gold);
     }
     .stat-box .k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-    .stat-box .v { font-size: 17px; font-weight: 800; margin-top: 4px; color: var(--ink); }
+    .stat-box .v { font-size: 16px; font-weight: 700; margin-top: 4px; color: var(--ink); }
     .stat-box.wide { flex: 2; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 22px; }
-    th, td { padding: 11px 8px; text-align: left; font-size: 13px; }
+    th, td { padding: 10px 8px; text-align: left; font-size: 13px; }
     thead th {
       border-bottom: 2px solid var(--ink);
       font-size: 10px;
@@ -132,14 +111,35 @@ if ($id > 0) {
       color: var(--muted);
       font-weight: 700;
     }
-    tbody tr { border-bottom: 1px solid #f0f0f0; }
+    tbody tr { border-bottom: 1px solid var(--border); }
     tbody tr:hover { background: var(--panel); }
-    tbody td:first-child { color: var(--gold-deep); font-weight: 700; }
+
+    .row-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .code-chip {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: var(--gold-bg);
+      color: #8a640b;
+      font-size: 12px;
+      font-weight: 700;
+    }
 
     .bottom-bar {
       margin-top: 30px;
       padding-top: 14px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       font-size: 10px;
@@ -155,21 +155,19 @@ if ($id > 0) {
 </head>
 <body>
 <div class="page">
-  <div class="side-strip"></div>
-  <div class="watermark">JUSTIN SOLUTION</div>
+
+  <div class="top-row">
+    <div class="brand-mini">
+      <img src="<?php echo WEB_ROOT; ?>ust-scc.png" alt="Justin Solution">
+      <div>
+        <div class="name">JUSTIN SOLUTION</div>
+        <div class="sub">Academic Records</div>
+      </div>
+    </div>
+    <div class="pill"><?php echo $single ? 'Course Record' : 'Course Registry'; ?></div>
+  </div>
 
   <div class="main">
-
-    <div class="top-row">
-      <div class="brand-mini">
-        <div class="crest">JS</div>
-        <div>
-          <div class="name">JUSTIN SOLUTION</div>
-          <div class="sub">Academic Records</div>
-        </div>
-      </div>
-      <div class="pill"><?php echo $single ? 'Course Record' : 'Course Registry'; ?></div>
-    </div>
 
     <div class="title-block">
       <h1><?php echo $single ? 'Course Details' : 'List of Courses'; ?></h1>
@@ -181,7 +179,7 @@ if ($id > 0) {
       <div class="stat-row">
         <div class="stat-box">
           <div class="k">Course Code</div>
-          <div class="v"><?php echo htmlspecialchars($single->course_code); ?></div>
+          <div class="v"><span class="code-chip"><?php echo htmlspecialchars($single->course_code); ?></span></div>
         </div>
         <div class="stat-box">
           <div class="k">Created At</div>
@@ -213,8 +211,8 @@ if ($id > 0) {
         <tbody>
           <?php $i = 1; foreach ($courses as $c): ?>
           <tr>
-            <td><?php echo $i++; ?></td>
-            <td><?php echo htmlspecialchars($c->course_code); ?></td>
+            <td><span class="row-num"><?php echo $i++; ?></span></td>
+            <td><span class="code-chip"><?php echo htmlspecialchars($c->course_code); ?></span></td>
             <td><?php echo htmlspecialchars($c->course_name); ?></td>
             <td><?php echo htmlspecialchars($c->created_at); ?></td>
           </tr>
