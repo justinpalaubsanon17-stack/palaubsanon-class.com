@@ -39,6 +39,7 @@ $courses = $mydb->loadResultList();
                   <div class="btn-group">
 
                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#AddNewEntry">Add New</button>
+                  <a href="print_all.php" target="_blank" class="btn btn-secondary"><i class="fas fa-print"></i> Print</a>
 
                 </div>
               </div>
