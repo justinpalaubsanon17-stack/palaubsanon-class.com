@@ -13,9 +13,13 @@ $courses = $mydb->loadResultList();
     <meta charset="UTF-8">
     <title>List of Courses - Print</title>
     <style>
+        @page {
+            margin: 0;
+        }
         body {
             font-family: Arial, Helvetica, sans-serif;
-            margin: 30px;
+            margin: 0;
+            padding: 30px;
             color: #222;
         }
         h2 {
