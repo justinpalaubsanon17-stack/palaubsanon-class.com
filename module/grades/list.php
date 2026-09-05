@@ -163,7 +163,7 @@ $subjects = $mydb->loadResultList();
               <!-- /.card-header -->
               <div class="row">
 
-<input type="text" name="UID" id="UID">
+<input type="hidden" name="UID" id="UID">
 
                     <div class="col-sm-12">
                       <div class="form-group">
