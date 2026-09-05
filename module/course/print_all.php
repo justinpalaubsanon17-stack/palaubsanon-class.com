@@ -123,7 +123,7 @@ $courses = $mydb->loadResultList();
         <button onclick="window.close();">Close</button>
     </div>
 
-    <div class="center doc-label">Course List</div>
+    <div class="center doc-label">List Of Courses</div>
 
     <div class="center">
         <div class="receipt-title">JUSTIN SOLUTION</div>

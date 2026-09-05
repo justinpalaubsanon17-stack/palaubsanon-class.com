@@ -143,7 +143,7 @@ function semester_label($val, $labels) {
     </div>
 
     <div class="center doc-label">
-        <?php echo $single ? 'List Of Subjects' : 'Subject List'; ?>
+        <?php echo $single ? 'Subject Record' : 'Subject List'; ?>
     </div>
 
     <div class="center">
