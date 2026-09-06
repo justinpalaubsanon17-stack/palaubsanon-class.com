@@ -152,8 +152,7 @@ $courses = $mydb->loadResultList();
 
         <div class="dashed"></div>
         <div class="total-row">
-            <span>TOTAL COURSES</span>
-            <span><?php echo count($courses); ?></span>
+            <span>TOTAL COURSES: <?php echo count($courses); ?></span>
         </div>
         <div class="dashed"></div>
 

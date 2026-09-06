@@ -196,8 +196,7 @@ function semester_label($val, $labels) {
 
             <div class="dashed"></div>
             <div class="total-row">
-                <span>TOTAL SUBJECTS</span>
-                <span><?php echo count($subjects); ?></span>
+                <span>TOTAL SUBJECTS: <?php echo count($subjects); ?></span>
             </div>
             <div class="dashed"></div>
 
