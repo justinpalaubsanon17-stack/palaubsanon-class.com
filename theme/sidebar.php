@@ -96,6 +96,15 @@
   </a>
   </li>
 
+      <li class="nav-item">
+  <a href='<?php echo WEB_ROOT; ?>module/cashier' class="nav-link <?php  echo ($title=='Cashier Module') ? "active" : 'na' ;?>">
+  <i class="nav-icon fa fa-cash-register"></i>
+  <p style="font-weight: normal">
+                Cashier
+  </p>
+  </a>
+  </li>
+
           <li class="nav-item has-treeview">
 
             <a href="#" class="nav-link <?php  echo ($title=='User Module' || $title=='User Type' ) ? "active" : 'na' ;?>">
