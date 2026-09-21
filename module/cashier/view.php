@@ -92,6 +92,7 @@ if (isset($_GET['id']) && $_GET['id'] != '') {
                   <th>Amount Paid</th>
                   <th>Balance</th>
                   <th>Payment Date</th>
+                  <th>Receipt</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,11 +104,16 @@ if (isset($_GET['id']) && $_GET['id'] != '') {
                     <td><?php echo number_format($p->amount_paid, 2); ?></td>
                     <td><?php echo number_format($p->balance, 2); ?></td>
                     <td><?php echo htmlspecialchars($p->payment_date); ?></td>
+                    <td>
+                      <a href="<?php echo WEB_ROOT; ?>module/cashier/receipt.php?id=<?php echo $p->PAY_ID; ?>" target="_blank">
+                        <button type="button" class="btn btn-secondary btn-xs" title="Print Receipt"><span class="fa fa-print"></span></button>
+                      </a>
+                    </td>
                   </tr>
                   <?php endforeach; ?>
                 <?php else: ?>
                   <tr>
-                    <td colspan="5" class="text-center text-muted">No payment records yet for this student.</td>
+                    <td colspan="6" class="text-center text-muted">No payment records yet for this student.</td>
                   </tr>
                 <?php endif; ?>
               </tbody>
@@ -123,3 +129,4 @@ if (isset($_GET['id']) && $_GET['id'] != '') {
 
   </div><!-- /.container-fluid -->
 </section>
+<!-- /.content -->

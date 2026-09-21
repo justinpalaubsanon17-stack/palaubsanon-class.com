@@ -69,6 +69,8 @@ if (isset($_POST['UID'])) {
 
 		<a href="index.php?view=view&id='.$result->student_id.'"><button type="button" class="btn btn-info btn-xs" title="View Student Payment History"><span class="fa fa-eye"></span></button></a>
 
+		<a href="receipt.php?id='.$result->PAY_ID.'" target="_blank"><button type="button" class="btn btn-secondary btn-xs" title="Print Receipt"><span class="fa fa-print"></span></button></a>
+
 		<a href="controller.php?action=delete&id='.$result->PAY_ID.'"><button type="button" class="btn btn-danger btn-xs" onclick="return confirm(\'Delete this payment record?\');"><span class="fa fa-trash fw-fa"></span> Del</button></a>
 
 		';
