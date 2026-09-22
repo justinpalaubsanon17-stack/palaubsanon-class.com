@@ -28,7 +28,6 @@ require_once ("../../theme/template.php");
             var t = $('#tblcashier').DataTable( {
             "processing":true,
             "serverSide":true,
-            "order":[],
             "ajax":{
               url:"<?php echo WEB_ROOT; ?>module/cashier/ajax.php",
               type:"POST"
@@ -37,6 +36,9 @@ require_once ("../../theme/template.php");
                     "searchable": true,
                     "orderable": true,
                     "targets": 1
+                }, {
+                    "orderable": false,
+                    "targets": [ 0, 7 ]
                 } ],
                  "scrollY":        "400px",
                 "scrollCollapse": true,
