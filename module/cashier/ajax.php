@@ -2,137 +2,169 @@
 require_once("../../include/initialize.php");
 global $mydb;
 
-// Guarantee that ONLY valid JSON is ever sent to the browser, even if a
-// stray notice/warning happens somewhere upstream (this is what was
-// causing DataTables' "Invalid JSON response" error).
-ob_start();
-header('Content-Type: application/json');
-
 if (isset($_POST['UID'])) {
-	$output = array();
-	$query = "SELECT * FROM `tblcashier`
-		WHERE PAY_ID = '".(int)$_POST["UID"]."'
-		LIMIT 1";
-	$mydb->setQuery($query);
-	$result = $mydb->loadResultList();
+  // Fetch a single payment row for the Edit modal
+  $output = array();
+  $query =  "SELECT `PAYMENT_ID`, `ENROLLMENT_ID`, `FEE_TYPE_ID`, `AMOUNT_PAID`, `PAYMENT_DATE`, `PAYMENT_METHOD`, `REMARKS`
+    FROM `tblcashier`
+    WHERE PAYMENT_ID = '".$_POST["UID"]."'
+    LIMIT 1";
+  $mydb->setQuery($query);
+  $result = $mydb->loadResultList();
 
-	if (is_array($result)) {
-		foreach ($result as $row) {
-			$output["PAY_ID"]      = $row->PAY_ID;
-			$output["student_id"]  = $row->student_id;
-			$output["sy_id"]       = $row->sy_id;
-			$output["amount_due"]  = $row->amount_due;
-			$output["amount_paid"] = $row->amount_paid;
-			$output["balance"]     = $row->balance;
-			$output["payment_date"]= $row->payment_date;
-		}
-	}
+  foreach($result as $row)
+  {
+    $output["UID"]             = $row->PAYMENT_ID;
+    $output["ENROLLMENT_ID"]   = $row->ENROLLMENT_ID;
+    $output["FEE_TYPE_ID"]     = $row->FEE_TYPE_ID;
+    $output["AMOUNT_PAID"]     = $row->AMOUNT_PAID;
+    $output["PAYMENT_DATE"]    = $row->PAYMENT_DATE;
+    $output["PAYMENT_METHOD"]  = $row->PAYMENT_METHOD;
+    $output["REMARKS"]         = $row->REMARKS;
+  }
+  echo json_encode($output);
 
-	ob_end_clean();
-	echo json_encode($output);
+} elseif (isset($_POST['FEE_ENROLLMENT_ID'])) {
+  // Fetch the current total fee for the Set Fee modal
+  $output = array();
+  $eid = (int)$_POST['FEE_ENROLLMENT_ID'];
+
+  $query = "SELECT e.ENROLLMENT_ID, s.FNAME, s.LNAME, sy.SCHOOL_YEAR, sy.SEMESTER,
+      COALESCE(fa.TOTAL_FEE,0) AS TOTAL_FEE
+    FROM tblenrollment e
+    LEFT JOIN tblstudent s ON s.S_ID = e.STUDENT_ID
+    LEFT JOIN tblschoolyear sy ON sy.SY_ID = e.SY_ID
+    LEFT JOIN tblfeeassessment fa ON fa.ENROLLMENT_ID = e.ENROLLMENT_ID
+    WHERE e.ENROLLMENT_ID = '".$eid."'
+    LIMIT 1";
+  $mydb->setQuery($query);
+  $result = $mydb->loadResultList();
+
+  foreach($result as $row)
+  {
+    $output["ENROLLMENT_ID"] = $row->ENROLLMENT_ID;
+    $output["STUDENT_NAME"]  = trim($row->LNAME.', '.$row->FNAME).' - '.$row->SCHOOL_YEAR.' ('.$row->SEMESTER.')';
+    $output["TOTAL_FEE"]     = $row->TOTAL_FEE;
+  }
+  echo json_encode($output);
+
 } else {
-	$output = array();
+  // DataTables server-side listing.
+  // ROW = ONE ENROLLMENT (every enrolled student shows, even with ₱0 paid),
+  // not one row per payment like before. Totals + latest payment info are
+  // pulled in via subqueries against tblcashier.
+  $output = array();
+  $query = "SELECT e.`ENROLLMENT_ID`, s.`FNAME`, s.`LNAME`, s.`IDNO`, sy.`SCHOOL_YEAR`, sy.`SEMESTER`,
+    COALESCE(fa.`TOTAL_FEE`,0) AS `TOTAL_FEE`,
+    COALESCE((SELECT SUM(c.AMOUNT_PAID) FROM tblcashier c
+              WHERE c.ENROLLMENT_ID = e.ENROLLMENT_ID),0) AS `TOTAL_PAID`,
+    (SELECT c.PAYMENT_ID FROM tblcashier c
+      WHERE c.ENROLLMENT_ID = e.ENROLLMENT_ID
+      ORDER BY c.PAYMENT_DATE DESC, c.PAYMENT_ID DESC LIMIT 1) AS `LAST_PAYMENT_ID`,
+    (SELECT c.PAYMENT_DATE FROM tblcashier c
+      WHERE c.ENROLLMENT_ID = e.ENROLLMENT_ID
+      ORDER BY c.PAYMENT_DATE DESC, c.PAYMENT_ID DESC LIMIT 1) AS `LAST_PAYMENT_DATE`,
+    (SELECT c.PAYMENT_METHOD FROM tblcashier c
+      WHERE c.ENROLLMENT_ID = e.ENROLLMENT_ID
+      ORDER BY c.PAYMENT_DATE DESC, c.PAYMENT_ID DESC LIMIT 1) AS `LAST_PAYMENT_METHOD`,
+    (SELECT ft.fee_type_name FROM tblcashier c
+      LEFT JOIN tblfeetypes ft ON ft.fee_type_id = c.FEE_TYPE_ID
+      WHERE c.ENROLLMENT_ID = e.ENROLLMENT_ID
+      ORDER BY c.PAYMENT_DATE DESC, c.PAYMENT_ID DESC LIMIT 1) AS `LAST_PAYMENT_FEE_TYPE`
+    FROM `tblenrollment` e
+    LEFT JOIN `tblstudent` s ON s.`S_ID` = e.`STUDENT_ID`
+    LEFT JOIN `tblschoolyear` sy ON sy.`SY_ID` = e.`SY_ID`
+    LEFT JOIN `tblfeeassessment` fa ON fa.`ENROLLMENT_ID` = e.`ENROLLMENT_ID`";
 
-	$query = "SELECT c.`PAY_ID`, c.`student_id`, c.`amount_due`, c.`amount_paid`, c.`balance`,
-					 c.`payment_date`,
-					 CONCAT(s.`LNAME`, ', ', s.`FNAME`, ' ', s.`MNAME`) AS student_name,
-					 sy.`school_year`, sy.`semester`
-			  FROM `tblcashier` c
-			  LEFT JOIN `tblstudent` s ON s.`S_ID` = c.`student_id`
-			  LEFT JOIN `tblschoolyear` sy ON sy.`sy_id` = c.`sy_id`";
+  if (isset($_POST["search"]["value"]) && $_POST["search"]["value"] != '')
+  {
+    $query .= " WHERE s.`FNAME` LIKE '%".$_POST["search"]["value"]."%'
+      OR s.`LNAME` LIKE '%".$_POST["search"]["value"]."%'
+      OR s.`IDNO` LIKE '%".$_POST["search"]["value"]."%' ";
+  }
 
-	if (isset($_POST["search"]["value"]) && $_POST["search"]["value"] != '') {
-		$searchValue = addslashes($_POST["search"]["value"]);
-		$query .= " WHERE s.`LNAME` LIKE '%".$searchValue."%' ";
-	}
+  // Sorting is disabled on the table (see index.php), so we always use a
+  // fixed, sensible default order instead of reading $_POST['order'].
+  $query .= " ORDER BY s.`LNAME` ASC, s.`FNAME` ASC ";
 
-	// Whitelist of columns that are actually safe/meaningful to sort by,
-	// keyed by the 0-based DataTables column index (matches the <thead>
-	// order in list.php). This replaces blindly concatenating whatever
-	// $_POST['order'][0]['column'] contains, which could be an out-of-range
-	// or non-existent SQL column position and break the query entirely.
-	$orderableColumns = array(
-		1 => 's.`LNAME`',        // Student
-		2 => 'sy.`school_year`', // School Year
-		3 => 'c.`amount_due`',
-		4 => 'c.`amount_paid`',
-		5 => 'c.`balance`',
-		6 => 'c.`payment_date`',
-	);
+  $post_length = isset($_POST["length"]) ? (int)$_POST["length"] : 10;
+  $post_start  = isset($_POST["start"])  ? (int)$_POST["start"]  : 0;
+  if ($post_length != -1)
+  {
+    $query .= " LIMIT " . $post_start . ", " . $post_length . "";
+  }
+  $mydb->setQuery($query);
+  $cur = $mydb->loadResultList();
+  $data = array();
+  $filtered_rows = $mydb->num_rows();
+  $i = 1;
+  foreach ($cur as $result) {
+    $sub_array = array();
+    $balance      = $result->TOTAL_FEE - $result->TOTAL_PAID;
+    $studentName  = trim($result->LNAME.', '.$result->FNAME);
+    $syLabel      = $result->SCHOOL_YEAR.' - '.$result->SEMESTER;
 
-	$orderColumn = 'c.`PAY_ID`';
-	$orderDir    = 'DESC';
+    $sub_array[] = $i;
+    $sub_array[] = $studentName;
+    $sub_array[] = $result->IDNO;
+    $sub_array[] = $syLabel;
+    $sub_array[] = '&#8369;'.number_format($result->TOTAL_PAID, 2);
 
-	if (isset($_POST["order"][0]["column"])) {
-		$colIndex = (int)$_POST["order"][0]["column"];
-		if (isset($orderableColumns[$colIndex])) {
-			$orderColumn = $orderableColumns[$colIndex];
-		}
-		if (isset($_POST["order"][0]["dir"]) && strtolower($_POST["order"][0]["dir"]) === 'asc') {
-			$orderDir = 'ASC';
-		} else {
-			$orderDir = 'DESC';
-		}
-	}
+    if ($result->TOTAL_FEE == 0) {
+      $sub_array[] = '<span class="badge badge-secondary">Not Assessed</span>';
+    } elseif ($balance <= 0) {
+      $sub_array[] = '<span class="badge badge-success">Fully Paid</span>';
+    } else {
+      $sub_array[] = '&#8369;'.number_format($balance, 2);
+    }
 
-	$query .= " ORDER BY ".$orderColumn." ".$orderDir." ";
+    $sub_array[] = $result->LAST_PAYMENT_DATE ? $result->LAST_PAYMENT_DATE : '&mdash;';
+    $sub_array[] = $result->LAST_PAYMENT_METHOD ? $result->LAST_PAYMENT_METHOD : '&mdash;';
+    $sub_array[] = $result->LAST_PAYMENT_FEE_TYPE ? $result->LAST_PAYMENT_FEE_TYPE : '&mdash;';
 
-	$length = isset($_POST["length"]) ? (int)$_POST["length"] : 10;
-	$start  = isset($_POST["start"]) ? (int)$_POST["start"] : 0;
+    // Everyone gets a "Pay" and "Set Fee" button. Edit/View/Delete only make
+    // sense if this enrollment already has at least one payment on record.
+    $payLabel = htmlspecialchars($studentName.' - '.$syLabel, ENT_QUOTES);
 
-	if ($length != -1) {
-		$query .= " LIMIT " . $start . ", " . $length . "";
-	}
+    $actions  = '<button type="button" data-eid="'.$result->ENROLLMENT_ID.'" data-name="'.$payLabel.'" class="btn btn-success btn-xs payEntry" title="Add Payment"><span class="fa fa-money-bill-wave"></span> Pay</button> ';
 
-	$mydb->setQuery($query);
-	$cur = $mydb->loadResultList();
-	$data = array();
-	$filtered_rows = $mydb->num_rows();
-	$i = $start + 1;
+    $actions .= '<button type="button" name="setfee" EID="'.$result->ENROLLMENT_ID.'" class="btn btn-secondary btn-xs setFeeEntry" title="Set Fee"><span class="fa fa-money-bill"></span></button> ';
 
-	if (is_array($cur)) {
-		foreach ($cur as $result) {
-			$sub_array = array();
+    if ($result->LAST_PAYMENT_ID) {
+      // Has at least one payment: buttons act on the most recent one.
+      $actions .= '<button type="button" name="update" UID="'.$result->LAST_PAYMENT_ID.'" class="btn btn-warning btn-xs editEntry" title="Edit Last Payment"><span class="fa fa-edit fw-fa"></span></button> ';
 
-			$sub_array[] = $i;
-			$sub_array[] = $result->student_name;
-			$sub_array[] = $result->school_year.' - '.$result->semester;
-			$sub_array[] = number_format($result->amount_due, 2);
-			$sub_array[] = number_format($result->amount_paid, 2);
-			$sub_array[] = number_format($result->balance, 2);
-			$sub_array[] = $result->payment_date;
+      $actions .= '<a href="index.php?view=view&id='.$result->LAST_PAYMENT_ID.'"><button type="button" class="btn btn-info btn-xs" title="View Receipt"><span class="fa fa-eye"></span></button></a> ';
 
-			$sub_array[] = '
+      $actions .= '<a href="controller.php?action=delete&id='.$result->LAST_PAYMENT_ID.'" onclick="return confirm(\'Delete this payment record?\');"><button type="button" class="btn btn-danger btn-xs" title="Delete Last Payment"><span class="fa fa-trash fw-fa"></span></button></a>';
+    } else {
+      // No payment yet: buttons are clickable (not disabled) but there's
+      // genuinely no payment record to edit/view/delete, so clicking
+      // explains that instead of doing nothing silently.
+      $actions .= '<button type="button" class="btn btn-warning btn-xs noPaymentEntry" data-msg="This student has no payment recorded yet. Click Pay to record one." title="No payment yet"><span class="fa fa-edit fw-fa"></span></button> ';
+      $actions .= '<button type="button" class="btn btn-info btn-xs noPaymentEntry" data-msg="No receipt yet - this student has not made a payment." title="No payment yet"><span class="fa fa-eye"></span></button> ';
+      $actions .= '<button type="button" class="btn btn-danger btn-xs noPaymentEntry" data-msg="Nothing to delete - this student has no payment recorded yet." title="No payment yet"><span class="fa fa-trash fw-fa"></span></button>';
+    }
 
-			<button type="button" name="update" UID="'.$result->PAY_ID.'" class="btn btn-warning btn-xs editEntry"><span class="fa fa-edit fw-fa"></span></button>
+    $sub_array[] = $actions;
+    $data[] = $sub_array;
+    $i = $i + 1;
+  }
 
-			<a href="index.php?view=view&id='.$result->student_id.'"><button type="button" class="btn btn-info btn-xs" title="View Student Payment History"><span class="fa fa-eye"></span></button></a>
+  function get_total_all_records()
+  {
+    global $mydb;
+    $statement = "SELECT `ENROLLMENT_ID` FROM `tblenrollment`";
+    $mydb->setQuery($statement);
+    return $mydb->num_rows();
+  }
 
-			<a href="receipt.php?id='.$result->PAY_ID.'" target="_blank"><button type="button" class="btn btn-secondary btn-xs" title="Print Receipt"><span class="fa fa-print"></span></button></a>
-
-			<a href="controller.php?action=delete&id='.$result->PAY_ID.'"><button type="button" class="btn btn-danger btn-xs" onclick="return confirm(\'Delete this payment record?\');"><span class="fa fa-trash fw-fa"></span> Del</button></a>
-
-			';
-			$data[] = $sub_array;
-			$i = $i + 1;
-		}
-	}
-
-	function get_total_all_records()
-	{
-		global $mydb;
-		$statement = "SELECT `PAY_ID` FROM `tblcashier`";
-		$mydb->setQuery($statement);
-		$mydb->loadResultList();
-		return $mydb->num_rows();
-	}
-
-	$output = array(
-		'data'            => $data,
-		"recordsTotal"    => get_total_all_records(),
-		"recordsFiltered" => $filtered_rows,
-	);
-
-	ob_end_clean();
-	echo json_encode($output);
+  $output = array(
+    "draw"            => isset($_POST['draw']) ? intval($_POST['draw']) : 0,
+    "recordsTotal"    => get_total_all_records(),
+    "recordsFiltered" => $filtered_rows,
+    "data"            => $data
+  );
+  echo json_encode($output);
 }
+?>

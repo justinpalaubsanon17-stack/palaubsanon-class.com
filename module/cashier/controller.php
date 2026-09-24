@@ -1,34 +1,12 @@
 <?php
 require_once ("../../include/initialize.php");
-	  if (!isset($_SESSION['ACCOUNT_ID'])){
-     // redirect(web_root."admin/index.php");
-     }
 global $mydb;
 
-$action = (isset($_GET['action']) && $_GET['action'] != '') ? $_GET['action'] : '';
+if (!isset($_SESSION['ACCOUNT_ID'])){
 
-// Runs a non-SELECT query (INSERT/UPDATE/DELETE) regardless of what your
-// Database class calls its execute method. Adjust the order/names below
-// if none of these match your class.
-function runQuery($mydb, $query){
-	$mydb->setQuery($query);
-	if (method_exists($mydb, 'executeQuery')) {
-		return $mydb->executeQuery();
-	} elseif (method_exists($mydb, 'query')) {
-		return $mydb->query();
-	} elseif (method_exists($mydb, 'execute')) {
-		return $mydb->execute();
-	} elseif (method_exists($mydb, 'doQuery')) {
-		return $mydb->doQuery();
-	} elseif (method_exists($mydb, 'run')) {
-		return $mydb->run();
-	} elseif (method_exists($mydb, 'save')) {
-		return $mydb->save();
-	} else {
-		// Last resort: setQuery() may execute immediately in your class
-		return true;
-	}
 }
+
+$action = (isset($_GET['action']) && $_GET['action'] != '') ? $_GET['action'] : '';
 
 switch ($action) {
 	case 'add' :
@@ -43,76 +21,92 @@ switch ($action) {
 	doDelete();
 	break;
 
+	case 'setfee' :
+	doSetFee();
+	break;
+
+}
+
+function doInsert(){
+	global $mydb;
+
+	$ENROLLMENT_ID  = $_POST['ENROLLMENT_ID'];
+	$FEE_TYPE_ID    = $_POST['FEE_TYPE_ID'];
+	$AMOUNT_PAID    = $_POST['AMOUNT_PAID'];
+	$PAYMENT_DATE   = $_POST['PAYMENT_DATE'];
+	$PAYMENT_METHOD = $_POST['PAYMENT_METHOD'];
+	$REMARKS        = $_POST['REMARKS'];
+
+	$query = "INSERT INTO `tblcashier` (`ENROLLMENT_ID`, `FEE_TYPE_ID`, `AMOUNT_PAID`, `PAYMENT_DATE`, `PAYMENT_METHOD`, `REMARKS`)
+		VALUES ('".$ENROLLMENT_ID."', '".$FEE_TYPE_ID."', '".$AMOUNT_PAID."', '".$PAYMENT_DATE."', '".$PAYMENT_METHOD."', '".$REMARKS."')";
+	$mydb->setQuery($query);
+
+	message("Payment has been recorded successfully!", "success");
+	redirect('index.php');
+}
+
+function doEdit(){
+	global $mydb;
+
+	$UID = $_POST['UID'];
+
+	$ENROLLMENT_ID  = $_POST['ENROLLMENT_ID1'];
+	$FEE_TYPE_ID    = $_POST['FEE_TYPE_ID1'];
+	$AMOUNT_PAID    = $_POST['AMOUNT_PAID1'];
+	$PAYMENT_DATE   = $_POST['PAYMENT_DATE1'];
+	$PAYMENT_METHOD = $_POST['PAYMENT_METHOD1'];
+	$REMARKS        = $_POST['REMARKS1'];
+
+	$query = "UPDATE `tblcashier` SET
+		`ENROLLMENT_ID` = '".$ENROLLMENT_ID."',
+		`FEE_TYPE_ID` = '".$FEE_TYPE_ID."',
+		`AMOUNT_PAID` = '".$AMOUNT_PAID."',
+		`PAYMENT_DATE` = '".$PAYMENT_DATE."',
+		`PAYMENT_METHOD` = '".$PAYMENT_METHOD."',
+		`REMARKS` = '".$REMARKS."'
+		WHERE `PAYMENT_ID` = '".$UID."'";
+	$mydb->setQuery($query);
+
+	message("Payment has been Updated successfully!", "success");
+	redirect('index.php');
+}
+
+function doDelete(){
+	global $mydb;
+
+	$id = $_GET['id'];
+
+	$query = "DELETE FROM `tblcashier` WHERE `PAYMENT_ID` = '".$id."'";
+	$mydb->setQuery($query);
+
+	message("Payment record already Deleted!","info");
+	redirect('index.php');
+}
+
+function doSetFee(){
+	global $mydb;
+
+	$ENROLLMENT_ID = $_POST['ENROLLMENT_ID_FEE'];
+	$TOTAL_FEE     = $_POST['TOTAL_FEE'];
+
+	$check = "SELECT ASSESSMENT_ID FROM `tblfeeassessment` WHERE ENROLLMENT_ID = '".$ENROLLMENT_ID."' LIMIT 1";
+	$mydb->setQuery($check);
+	$mydb->loadResultList();
+	$exists = $mydb->num_rows();
+
+	if ($exists >= 1) {
+		$query = "UPDATE `tblfeeassessment` SET
+			`TOTAL_FEE` = '".$TOTAL_FEE."',
+			`DATE_ASSESSED` = CURDATE()
+			WHERE `ENROLLMENT_ID` = '".$ENROLLMENT_ID."'";
+	} else {
+		$query = "INSERT INTO `tblfeeassessment` (`ENROLLMENT_ID`, `TOTAL_FEE`, `DATE_ASSESSED`)
+			VALUES ('".$ENROLLMENT_ID."', '".$TOTAL_FEE."', CURDATE())";
 	}
+	$mydb->setQuery($query);
 
-	function doInsert(){
-		global $mydb;
-
-		$student_id   = (int)$_POST['student_id'];
-		$sy_id        = (int)$_POST['sy_id'];
-		$amount_due   = (float)$_POST['amount_due'];
-		$amount_paid  = (float)$_POST['amount_paid'];
-		$balance      = $amount_due - $amount_paid;
-		$payment_date = $_POST['payment_date'];
-
-		$query = "INSERT INTO `tblcashier`
-			(`student_id`, `sy_id`, `amount_due`, `amount_paid`, `balance`, `payment_date`)
-			VALUES
-			('".$student_id."', '".$sy_id."', '".$amount_due."', '".$amount_paid."', '".$balance."', '".$payment_date."')";
-
-		$istrue = runQuery($mydb, $query);
-
-		if ($istrue) {
-			message("New payment record has been created successfully!", "success");
-			redirect('index.php');
-		}else{
-			message("No payment record has been created successfully!", "error");
-			redirect('index.php');
-		}
-	}
-
-	function doEdit(){
-		global $mydb;
-
-		$UID = (int)$_POST['UID'];
-
-		$student_id   = (int)$_POST['student_id1'];
-		$sy_id        = (int)$_POST['sy_id1'];
-		$amount_due   = (float)$_POST['amount_due1'];
-		$amount_paid  = (float)$_POST['amount_paid1'];
-		$balance      = $amount_due - $amount_paid;
-		$payment_date = $_POST['payment_date1'];
-
-		$query = "UPDATE `tblcashier` SET
-			`student_id` = '".$student_id."',
-			`sy_id` = '".$sy_id."',
-			`amount_due` = '".$amount_due."',
-			`amount_paid` = '".$amount_paid."',
-			`balance` = '".$balance."',
-			`payment_date` = '".$payment_date."'
-			WHERE `PAY_ID` = '".$UID."'";
-
-		$istrue = runQuery($mydb, $query);
-
-		if ($istrue){
-			message("Payment record has been updated successfully!", "success");
-			redirect('index.php');
-		}else{
-			message("No payment record has been updated successfully!", "error");
-			redirect('index.php');
-		}
-	}
-
-	function doDelete(){
-		global $mydb;
-
-		$id = (int)$_GET['id'];
-
-		$query = "DELETE FROM `tblcashier` WHERE `PAY_ID` = '".$id."'";
-		runQuery($mydb, $query);
-
-		message("Payment record has been deleted!","info");
-		redirect('index.php');
-	}
+	message("Total fee has been saved successfully!", "success");
+	redirect('index.php');
+}
 
 ?>

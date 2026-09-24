@@ -2,7 +2,7 @@
 defined('DB_SERVER') ? null : define("DB_SERVER", "localhost");
 defined('DB_USER') ? null : define ("DB_USER", "root") ;
 defined('DB_PASS') ? null : define("DB_PASS","");
-defined('DB_NAME') ? null : define("DB_NAME", "alumni_db") ;
+defined('DB_NAME') ? null : define("DB_NAME", "just_db") ;
 
 $this_file = str_replace('\\', '/', __File__) ;
 $doc_root = $_SERVER['DOCUMENT_ROOT'];

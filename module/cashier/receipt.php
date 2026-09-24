@@ -15,11 +15,18 @@ if (isset($_GET['id']) && $_GET['id'] != '') {
     $payment = $mydb->loadSingleResult();
 }
 
+function safe_amount($val) {
+    if ($val === null || $val === '' || !is_numeric($val)) {
+        return 0.0;
+    }
+    return (float)$val;
+}
+
 $status = 'UNPAID';
 if ($payment) {
-    if ($payment->balance <= 0) {
+    if (safe_amount($payment->balance) <= 0) {
         $status = 'PAID';
-    } elseif ($payment->amount_paid > 0) {
+    } elseif (safe_amount($payment->amount_paid) > 0) {
         $status = 'PARTIAL';
     }
 }
@@ -29,137 +36,122 @@ if ($payment) {
 <head>
     <meta charset="UTF-8">
     <title>Official Receipt<?php echo $payment ? ' - #'.str_pad($payment->PAY_ID, 6, '0', STR_PAD_LEFT) : ''; ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
 
         :root{
-            --paper:#fdfdfb;
             --ink:#1a1a1a;
             --ink-soft:#555;
-            --rule:#1a1a1a;
-            --rule-faint:#bbb;
+            --rule:#333;
+            --rule-faint:#ccc;
+            --accent:#1a3d6d;
         }
 
         body {
-            font-family: 'Courier Prime', 'Space Mono', 'Courier New', Consolas, Menlo, monospace;
-            background: #e9e7e2;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f2;
             margin: 0;
             padding: 40px 20px 60px;
             color: var(--ink);
         }
 
-        /* Force Chrome/Safari to print backgrounds (barcode, perforated
-           edges, paper texture) even if "Background graphics" is left off */
-        *, *::before, *::after {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            color-adjust: exact;
-        }
-
         .no-print {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .no-print button {
-            font-family: 'Space Mono', 'Courier New', Consolas, Menlo, monospace;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 13px;
-            letter-spacing: .04em;
-            padding: 10px 20px;
-            border: 1px solid var(--ink);
-            background: var(--ink);
-            color: var(--paper);
-            border-radius: 2px;
+            padding: 9px 22px;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: #fff;
+            border-radius: 3px;
             cursor: pointer;
         }
-        .no-print button:hover { background: var(--paper); color: var(--ink); }
+        .no-print button:hover { opacity: 0.9; }
         .no-print button.secondary {
-            background: var(--paper);
-            color: var(--ink);
+            background: #fff;
+            color: var(--accent);
             margin-left: 8px;
         }
-        .no-print button.secondary:hover { background: var(--ink); color: var(--paper); }
+        .no-print button.secondary:hover { background: #f0f4f9; }
 
         .receipt-wrap {
-            position: relative;
-            max-width: 420px;
+            max-width: 640px;
             margin: 0 auto;
-            filter: drop-shadow(0 18px 30px rgba(0,0,0,0.18));
         }
-
-        .edge {
-            height: 12px;
-            width: 100%;
-            background:
-                linear-gradient(-45deg, var(--paper) 6px, transparent 0),
-                linear-gradient(45deg, var(--paper) 6px, transparent 0);
-            background-position: left top;
-            background-repeat: repeat-x;
-            background-size: 14px 14px;
-            background-color: transparent;
-        }
-        .edge.top { transform: scaleY(-1); }
 
         .receipt {
-            background: var(--paper);
-            padding: 32px 28px 22px;
-            background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+            background: #fff;
+            border: 1px solid var(--rule);
+            padding: 36px 40px 28px;
         }
 
-        .brand { text-align: center; margin-bottom: 18px; }
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
         .brand-name {
-            font-family: 'Space Mono', 'Courier New', Consolas, Menlo, monospace;
+            font-size: 22px;
             font-weight: 700;
-            font-size: 20px;
-            letter-spacing: .06em;
             margin: 0;
+            letter-spacing: 0.3px;
+            color: var(--ink);
         }
         .brand-sub {
-            font-size: 11px;
-            letter-spacing: .12em;
-            color: var(--ink-soft);
-            margin: 4px 0 0;
-        }
-
-        .meta-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .rule { border: none; border-top: 1px dashed var(--rule); margin: 16px 0; }
-        .rule.solid { border-top: 1.5px solid var(--rule); }
-
-        .status-line {
-            text-align: center;
             font-size: 12px;
-            letter-spacing: .2em;
-            font-weight: 700;
-            margin-bottom: 14px;
+            color: var(--ink-soft);
+            margin: 3px 0 0;
         }
-        .status-line::before { content: "* "; }
-        .status-line::after { content: " *"; }
+        .brand-doc {
+            text-align: right;
+        }
+        .brand-doc .doc-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin: 0;
+        }
+        .brand-doc .doc-no {
+            font-size: 13px;
+            color: var(--ink-soft);
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border: 1px solid var(--rule);
+            border-radius: 3px;
+            margin-bottom: 18px;
+        }
 
         table.details {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 6px;
+            margin-bottom: 22px;
         }
         table.details td {
             padding: 6px 0;
             font-size: 13px;
             vertical-align: top;
-            border-bottom: 1px dotted var(--rule-faint);
+            border-bottom: 1px solid var(--rule-faint);
         }
         table.details td.label {
             color: var(--ink-soft);
-            letter-spacing: .03em;
+            width: 40%;
         }
         table.details td.value {
-            font-weight: 700;
+            font-weight: 600;
             color: var(--ink);
             text-align: right;
         }
@@ -167,65 +159,62 @@ if ($payment) {
         table.amounts {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 18px;
+            margin-top: 6px;
         }
         table.amounts th {
-            font-size: 11px;
-            letter-spacing: .08em;
-            color: var(--ink-soft);
-            padding-bottom: 6px;
+            font-size: 12px;
+            color: #fff;
+            background: var(--accent);
+            padding: 8px 10px;
             text-align: left;
-            border-bottom: 1px solid var(--rule);
-            font-weight: 400;
+            font-weight: 600;
         }
         table.amounts th.right, table.amounts td.right { text-align: right; }
         table.amounts td {
-            padding: 9px 0;
+            padding: 9px 10px;
             font-size: 13px;
-            border-bottom: 1px dotted var(--rule-faint);
+            border-bottom: 1px solid var(--rule-faint);
         }
         table.amounts tr.balance-row td {
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
             border-bottom: none;
-            border-top: 1.5px solid var(--rule);
+            border-top: 2px solid var(--rule);
             padding-top: 12px;
         }
 
-        .barcode {
-            margin: 24px 0 6px;
-            height: 44px;
-            background: repeating-linear-gradient(
-                90deg,
-                var(--ink), var(--ink) 2px,
-                transparent 2px, transparent 3px,
-                var(--ink) 3px, var(--ink) 4px,
-                transparent 4px, transparent 6px,
-                var(--ink) 6px, var(--ink) 8px,
-                transparent 8px, transparent 9px
-            );
-            opacity: .85;
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
         }
-        .barcode-num {
+        .sig-box {
+            width: 45%;
             text-align: center;
-            font-size: 11px;
-            letter-spacing: .3em;
+            font-size: 12px;
             color: var(--ink-soft);
-            margin-top: 6px;
+        }
+        .sig-line {
+            border-top: 1px solid var(--ink);
+            margin-bottom: 6px;
+            padding-top: 4px;
         }
 
         .footer-note {
-            margin-top: 20px;
+            margin-top: 28px;
             font-size: 11px;
             color: var(--ink-soft);
             text-align: center;
+            border-top: 1px solid var(--rule-faint);
+            padding-top: 12px;
             line-height: 1.6;
         }
 
         @media print {
-            @page { margin: 0.4in; }
-            body { background: var(--paper); padding: 0; }
-            .receipt-wrap { filter: none; max-width: 100%; margin: 0 auto; }
+            @page { margin: 0.5in; }
+            body { background: #fff; padding: 0; }
+            .receipt-wrap { max-width: 100%; margin: 0 auto; }
+            .receipt { border: none; padding: 0; }
             .no-print { display: none; }
         }
     </style>
@@ -248,22 +237,20 @@ if ($payment) {
     </div>
 
     <div class="receipt-wrap">
-        <div class="edge top"></div>
         <div class="receipt">
 
             <div class="brand">
-                <p class="brand-name">JUSTIN SOLUTION</p>
-                <p class="brand-sub">SCHOOL CASHIER OFFICE</p>
+                <div>
+                    <p class="brand-name">JUSTIN SOLUTION</p>
+                    <p class="brand-sub">School Management System &mdash; Cashier Office</p>
+                </div>
+                <div class="brand-doc">
+                    <p class="doc-title">OFFICIAL RECEIPT</p>
+                    <div class="doc-no">No. <?php echo str_pad($payment->PAY_ID, 6, '0', STR_PAD_LEFT); ?></div>
+                </div>
             </div>
 
-            <div class="meta-row">
-                <span>RECEIPT NO.</span>
-                <span>#<?php echo str_pad($payment->PAY_ID, 6, '0', STR_PAD_LEFT); ?></span>
-            </div>
-
-            <hr class="rule solid">
-
-            <div class="status-line"><?php echo $status; ?></div>
+            <span class="status-badge"><?php echo htmlspecialchars($status); ?></span>
 
             <table class="details">
                 <tr>
@@ -288,27 +275,35 @@ if ($payment) {
                 <thead>
                     <tr>
                         <th>Description</th>
-                        <th class="right">Amount (₱)</th>
+                        <th class="right">Amount (&#8369;)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>Amount Due</td>
-                        <td class="right"><?php echo number_format($payment->amount_due, 2); ?></td>
+                        <td class="right"><?php echo number_format(safe_amount($payment->amount_due), 2); ?></td>
                     </tr>
                     <tr>
                         <td>Amount Paid</td>
-                        <td class="right"><?php echo number_format($payment->amount_paid, 2); ?></td>
+                        <td class="right"><?php echo number_format(safe_amount($payment->amount_paid), 2); ?></td>
                     </tr>
                     <tr class="balance-row">
                         <td>Balance</td>
-                        <td class="right"><?php echo number_format($payment->balance, 2); ?></td>
+                        <td class="right"><?php echo number_format(safe_amount($payment->balance), 2); ?></td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="barcode"></div>
-            <div class="barcode-num"><?php echo str_pad($payment->PAY_ID, 16, '0', STR_PAD_LEFT); ?></div>
+            <div class="signatures">
+                <div class="sig-box">
+                    <div class="sig-line">&nbsp;</div>
+                    Received By (Cashier)
+                </div>
+                <div class="sig-box">
+                    <div class="sig-line">&nbsp;</div>
+                    Authorized Signature
+                </div>
+            </div>
 
             <div class="footer-note">
                 This is a system-generated receipt issued by JUSTIN SOLUTION.<br>
@@ -316,7 +311,6 @@ if ($payment) {
             </div>
 
         </div>
-        <div class="edge"></div>
     </div>
 
 <?php endif; ?>
